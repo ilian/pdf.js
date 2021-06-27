@@ -433,10 +433,23 @@ function getVisibleElements({
   horizontal = false,
   rtl = false,
 }) {
+  const containerRect = scrollEl.getBoundingClientRect();
+  const vw = document.documentElement.clientWidth,
+        vh = document.documentElement.clientHeight;
+  /*
+  // Coordinates of view relative to top left of overflow content
   const top = scrollEl.scrollTop,
     bottom = top + scrollEl.clientHeight;
   const left = scrollEl.scrollLeft,
     right = left + scrollEl.clientWidth;
+    */
+
+  function isElementVisibleInViewport(view) {
+    // TODO: Toolbar
+    const viewRect = view.div.getBoundingClientRect();
+    return !(viewRect.bottom < 0 || viewRect.top >= vh) &&
+           !(viewRect.right < 0 || viewRect.left >= vw);
+  }
 
   // Throughout this "generic" function, comments will assume we're working with
   // PDF document pages, which is the most important and complex case. In this
@@ -450,10 +463,10 @@ function getVisibleElements({
   // the padding edge.
   function isElementBottomAfterViewTop(view) {
     const element = view.div;
-    const elementBottom =
-      element.offsetTop + element.clientTop + element.clientHeight;
-    return elementBottom > top;
+    const viewRect = view.div.getBoundingClientRect();
+    return viewRect.bottom > 0;
   }
+
   function isElementNextAfterViewHorizontally(view) {
     const element = view.div;
     const elementLeft = element.offsetLeft + element.clientLeft;
@@ -501,7 +514,8 @@ function getVisibleElements({
 
   for (let i = firstVisibleElementInd; i < numViews; i++) {
     const view = views[i],
-      element = view.div;
+      element = view.div,
+      elementRect = element.getBoundingClientRect();
     const currentWidth = element.offsetLeft + element.clientLeft;
     const currentHeight = element.offsetTop + element.clientTop;
     const viewWidth = element.clientWidth,
@@ -514,26 +528,23 @@ function getVisibleElements({
       // Setting lastEdge to the bottom of the first page that is partially
       // visible ensures that the next page fully below lastEdge is on the
       // next row, which has to be fully hidden along with all subsequent rows.
-      if (viewBottom >= bottom) {
+      if (elementRect.bottom >= vh) {
         lastEdge = viewBottom;
       }
     } else if ((horizontal ? currentWidth : currentHeight) > lastEdge) {
       break;
     }
 
-    if (
-      viewBottom <= top ||
-      currentHeight >= bottom ||
-      viewRight <= left ||
-      currentWidth >= right
-    ) {
+    if (!isElementVisibleInViewport(view)) {
       continue;
     }
 
     const hiddenHeight =
-      Math.max(0, top - currentHeight) + Math.max(0, viewBottom - bottom);
+      Math.max(0, -elementRect.top) +
+      Math.max(0, elementRect.bottom - vh);
     const hiddenWidth =
-      Math.max(0, left - currentWidth) + Math.max(0, viewRight - right);
+      Math.max(0, -elementRect.left) +
+      Math.max(0, elementRect.right - vw);
 
     const fractionHeight = (viewHeight - hiddenHeight) / viewHeight,
       fractionWidth = (viewWidth - hiddenWidth) / viewWidth;

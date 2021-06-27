@@ -238,7 +238,7 @@ select {
 }
 
 #sidebarContainer {
-  position: absolute;
+  position: fixed;
   top: 32px;
   bottom: 0;
   width: var(--sidebar-width);
@@ -305,8 +305,6 @@ html[dir="rtl"] #sidebarContent {
 }
 
 #viewerContainer {
-  overflow: auto;
-  -webkit-overflow-scrolling: touch;
   position: absolute;
   top: 32px;
   right: 0;
@@ -338,7 +336,7 @@ html[dir="rtl"]
 }
 
 .toolbar {
-  position: relative;
+  position: fixed;
   left: 0;
   right: 0;
   z-index: 9999;
@@ -483,7 +481,7 @@ html[dir="rtl"] #outerContainer.sidebarOpen #loadingBar {
 .findbar,
 .secondaryToolbar {
   top: 32px;
-  position: absolute;
+  position: fixed;
   z-index: 10000;
   height: auto;
   min-width: 16px;
@@ -1546,7 +1544,7 @@ html[dir="rtl"] .treeItemToggler::before {
 
 #overlayContainer {
   display: table;
-  position: absolute;
+  position: fixed;
   width: 100%;
   height: 100%;
   background-color: rgba(0, 0, 0, 0.2);
